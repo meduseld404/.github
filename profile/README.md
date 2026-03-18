@@ -1,212 +1,83 @@
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/a992766f-24d7-4271-88b4-62333265a1bf" alt="Meduseld" width="250">
+</p>
+
 # Meduseld
 
-Our web control panel for managing the Icarus game server. Instead of SSHing into the box every time we want to restart the server, we can just hit a button in the browser.
+A self-hosted server management platform for our gaming group. Web-based control panel, media streaming, system monitoring, and Discord-based authentication — all accessible from a browser.
 
 ## What It Does
 
-This is basically a remote control for our Icarus dedicated server:
+Instead of SSHing into the box every time we want to restart the game server, we just hit a button. The whole thing is browser-based, so anyone in the group can manage things from their phone or laptop.
 
-- Start/stop/restart the server with one click
-- See if it's actually running or if it crashed again
-- Check how many people are online
-- Monitor CPU, RAM, and disk usage
-- Read server logs without SSHing in
-- Update the game when new patches drop
+- Start/stop/restart the game server with one click
+- See if it's running, crashed, or updating
+- Check who's online and monitor system resources
+- Stream media through Jellyfin with automatic account provisioning
+- View server logs and system stats without SSH
+- Manage users and permissions through Discord roles
 
-It's all browser-based, so anyone in the group can manage the server from their phone or laptop.
+## Repositories
 
-## Features
+### [herugrim](https://github.com/meduseld-io/herugrim) (Public)
 
-- **Server Control**: Start, stop, restart, or force kill the Icarus server
-- **Live Stats**: Real-time graphs showing CPU, RAM, disk usage over the last 30 minutes
-- **Server Logs**: View game logs directly in the browser - see who's connecting, what's breaking, etc.
-- **Update Checker**: Automatically checks Steam for new Icarus updates
-- **Web Terminal**: Full SSH access through the browser if you need to run commands
+Discord OIDC identity provider for Cloudflare Access. A Cloudflare Worker that bridges Discord OAuth to Cloudflare Access, enabling Discord-based login across all Meduseld services. Fork of [Erisa/discord-oidc-worker](https://github.com/Erisa/discord-oidc-worker) with added admin role detection and richer user profile claims.
+
+**Tech**: Cloudflare Workers, Hono, Jose
+
+### meduseld-backend (Private)
+
+Flask backend powering the control panel, health dashboard, and API. Handles game server process management, system monitoring, Jellyfin SSO, calendar events, user management, and backup/reboot services.
+
+**Tech**: Python, Flask, PostgreSQL, SQLAlchemy
+
+### meduseld-site (Private)
+
+Static frontend pages served via Cloudflare Pages. The services hub, system monitor, admin panel, Edoras media management page, and landing page.
+
+**Tech**: HTML, CSS, JavaScript, Bootstrap 5, Chart.js
+
+## How It Works
+
+```
+Browser → Cloudflare Access (Discord login via herugrim)
+       → Cloudflare Pages (static site)
+       → Cloudflare Tunnel → Flask backend (API + panel)
+                           → Game server / Jellyfin / SSH
+```
+
+Users log in with Discord. Cloudflare Access handles auth using herugrim as the OIDC provider. Admin status is determined by a Discord role — no manual promotion needed.
+
+## Services
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| Landing | meduseld.io | Splash page |
+| Services Hub | services.meduseld.io | Main navigation, status checks, calendar, game news |
+| Game Panel | panel.meduseld.io | Server control, logs, stats, charts |
+| System Monitor | system.meduseld.io | Server logs, resource monitoring, backup/reboot (admin) |
+| Admin Panel | admin.meduseld.io | User management (admin) |
+| Edoras | edoras.meduseld.io | Media service management (admin) |
+| Jellyfin | jellyfin.meduseld.io | Media streaming with auto-provisioned accounts |
+| SSH Terminal | ssh.meduseld.io | Browser-based SSH (admin) |
+| Health | health.meduseld.io | Public service status dashboard |
 
 ## How to Access
 
 1. Go to https://meduseld.io
-2. Click through to the service menu
+2. Click through to the services menu
 3. Log in with Discord
-4. Pick what you need (Game Panel, SSH Terminal, Jellyfin, etc.)
-5. Do your thing
+4. Pick what you need
 
-If you can't get in, bug whoever's managing the Cloudflare Access list to add your Discord account.
+If you can't get in, ask whoever manages the Cloudflare Access list to add your Discord account.
 
-## Server Status
+## Server Hardware
 
-The panel shows different states:
-
-- **Offline** - Server's not running, hit Start
-- **Starting** - Booting up, give it a minute
-- **Running** - We're live, people can join
-- **Stopping** - Shutting down
-- **Restarting** - Usually means it's updating
-- **Crashed** - Something went wrong, check logs or restart
-
-## Quick Guide
-
-**Starting the server**: Click the green Start button, wait 30-60 seconds
-
-**Checking if it's up**: Status will show "Running" in green, plus you'll see the player count
-
-**Server's frozen**: Use Force Stop to kill it, then start it again
-
-**Updating the game**: Click "Check for Updates" - if there's a new version, hit Restart and it'll update automatically
-
-**Reading logs**: Click the Logs tab to see what's happening in real-time
-
-**Understanding the graphs**:
-- CPU: How hard the processor is working
-- Memory: How much RAM is being used
-- Disk: Storage space used
-
-If any of these hit 100%, the server's probably gonna have a bad time.
+AMD Ryzen 7 2700 • 32GB DDR4 3600 • RTX 3060 • 1TB NVMe SSD • Ubuntu Server 24.04
 
 ## Contributors
 
-- [Add your names here]
-
-## For Developers
-
-Want to change something or add a feature? Here's how:
-
-### Making Changes
-
-1. Clone the repo and make a branch:
-```bash
-git clone <repo-url>
-cd meduseld
-git checkout -b feature/whatever-youre-doing
-```
-
-2. Edit stuff in the `app/` folder:
-   - `app/webserver.py` - Main Flask app
-   - `app/config.py` - Settings
-   - `app/templates/panel.html` - Control panel UI
-   - `app/static/css/style.css` - Styles
-
-3. Test locally if you want:
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python app/webserver.py
-```
-Then visit http://localhost:5000
-
-4. Push your branch:
-```bash
-git add .
-git commit -m "what you changed"
-git push -u origin feature/whatever-youre-doing
-```
-
-5. Open a PR on GitHub
-
-6. After it's merged, deploy to the server:
-```bash
-ssh vertebra@meduseld.io
-cd /srv/meduseld
-git pull
-sudo systemctl restart icarus-panel
-```
-
-### How It Works
-
-```
-Browser → Cloudflare (auth + HTTPS) → Cloudflare Tunnel → Flask App (port 5000) → Icarus Server
-```
-
-The Flask app monitors the Icarus process and collects stats every few seconds. The UI polls the API every 5 seconds to update the display.
-
-### Key Files
-
-- `app/webserver.py` - Flask routes, API endpoints, server monitoring
-- `app/config.py` - All the settings (paths, timeouts, etc.)
-- `app/templates/panel.html` - Control panel UI (Bootstrap + Chart.js)
-- `app/templates/terminal.html` - SSH terminal wrapper (uses ttyd)
-
-### Common Tasks
-
-**Restart the panel**:
-```bash
-ssh vertebra@meduseld.io
-sudo systemctl restart icarus-panel
-```
-
-**View panel logs**:
-```bash
-ssh vertebra@meduseld.io
-tail -f /srv/meduseld/logs/webserver.log
-```
-
-**Manually start/stop Icarus** (bypassing the panel):
-```bash
-ssh vertebra@meduseld.io
-cd /srv/games/icarus
-./start.sh              # Start
-pkill -9 IcarusServer   # Stop
-```
-
-**Check what's running**:
-```bash
-ssh vertebra@meduseld.io
-sudo systemctl status icarus-panel
-sudo systemctl status ttyd
-sudo systemctl status cloudflared
-```
-
-### Troubleshooting
-
-**"Server shows offline but it's actually running"**
-The process name might've changed. Check with `ps aux | grep -i icarus` and update `PROCESS_NAME` in `app/config.py` if needed.
-
-**"Graphs aren't updating"**
-Stats thread probably crashed. Restart the panel: `sudo systemctl restart icarus-panel`
-
-**"Can't access the site"**
-1. Check if Cloudflare Tunnel is running: `sudo systemctl status cloudflared`
-2. Make sure your email is in the Access list
-3. Try incognito mode
-
-**"My changes aren't showing up"**
-Did you restart the panel after pulling? `sudo systemctl restart icarus-panel`
-
-### API Endpoints
-
-If you want to script stuff:
-
-```bash
-# Control
-curl -X POST https://panel.meduseld.io/start
-curl -X POST https://panel.meduseld.io/stop
-curl -X POST https://panel.meduseld.io/restart
-curl -X POST https://panel.meduseld.io/kill
-
-# Stats
-curl https://panel.meduseld.io/api/stats | jq
-curl https://panel.meduseld.io/api/logs | jq
-curl https://panel.meduseld.io/api/history | jq
-curl https://panel.meduseld.io/api/check-update | jq
-```
-
-## Tech Stack
-
-- Python 3.12 + Flask
-- Bootstrap 5 + Chart.js
-- ttyd (web terminal)
-- Cloudflare Tunnel + Access
-- Ubuntu Server 24.04
-
-## Adding Someone New
-
-1. Add their email to Cloudflare Access (Zero Trust dashboard → Applications → Meduseld)
-2. Add them to GitHub if they're gonna code (Repo Settings → Collaborators)
-3. Send them the URL: https://panel.meduseld.io
-
-## Version
-
-Current: **0.3.0-alpha**
-
-Still in alpha, so expect some rough edges. Report bugs in the group chat or open an issue.
+| | |
+|---|---|
+| [@quietarcade](https://github.com/quietarcade) | [@Hier0g1yphiK](https://github.com/Hier0g1yphiK) |
+| [@glenwinters859](https://github.com/glenwinters859) | [@ThomasDrennan](https://github.com/ThomasDrennan) |
