@@ -4,76 +4,33 @@
 
 # Meduseld
 
-A self-hosted server management platform for our gaming group. Web-based control panel, media streaming, system monitoring, and Discord-based authentication — all accessible from a browser.
+We build tools for self-hosted server management. Our public project is Herugrim — everything else is internal tooling for our gaming group.
 
-## What It Does
+## Open Source
 
-Instead of SSHing into the box every time we want to restart the game server, we just hit a button. The whole thing is browser-based, so anyone in the group can manage things from their phone or laptop.
+### [Herugrim](https://github.com/meduseld-io/herugrim)
 
-- Start/stop/restart the game server with one click
-- See if it's running, crashed, or updating
-- Check who's online and monitor system resources
-- Stream media through Jellyfin with automatic account provisioning
-- View server logs and system stats without SSH
-- Manage users and permissions through Discord roles
+A Cloudflare Worker that lets you authenticate with Cloudflare Access using Discord. It wraps OIDC around Discord's OAuth2 API so Cloudflare Access can use Discord as an identity provider — no separate identity service needed.
 
-## Repositories
+Fork of [Erisa/discord-oidc-worker](https://github.com/Erisa/discord-oidc-worker) with several improvements:
 
-### [herugrim](https://github.com/meduseld-io/herugrim) (Public)
+- **Admin role detection** — checks for a specific Discord role and includes `is_admin` in the JWT, so your app can do role-based access control without a separate admin system
+- **Rich user claims** — the ID token includes a `discord_user` object with full profile data (ID, username, display name, avatar, discriminator) instead of just email
+- **No KV dependency** — signing keys are generated in-memory, so there's no Cloudflare KV namespace to set up
+- **No config file** — everything is configured as constants in the worker, no external `config.json` to manage
+- **Optional guild restriction** — limit access to members of specific Discord servers
+- **Simplified setup** — clone, edit a few constants, deploy
 
-Discord OIDC identity provider for Cloudflare Access. A Cloudflare Worker that bridges Discord OAuth to Cloudflare Access, enabling Discord-based login across all Meduseld services. Fork of [Erisa/discord-oidc-worker](https://github.com/Erisa/discord-oidc-worker) with added admin role detection and richer user profile claims.
+If you're using Cloudflare Access and want Discord login, this is what you need. Check the [repo README](https://github.com/meduseld-io/herugrim#readme) for setup instructions.
 
-**Tech**: Cloudflare Workers, Hono, Jose
+**Tech**: Cloudflare Workers, Hono, Jose · **License**: MIT
 
-### meduseld-backend (Private)
+## Internal Projects
 
-Flask backend powering the control panel, health dashboard, and API. Handles game server process management, system monitoring, Jellyfin SSO, calendar events, user management, and backup/reboot services.
+The rest of our repos are private tools we use to manage a dedicated game server, media streaming, and system monitoring for our friend group.
 
-**Tech**: Python, Flask, PostgreSQL, SQLAlchemy
-
-### meduseld-site (Private)
-
-Static frontend pages served via Cloudflare Pages. The services hub, system monitor, admin panel, Edoras media management page, and landing page.
-
-**Tech**: HTML, CSS, JavaScript, Bootstrap 5, Chart.js
-
-## How It Works
-
-```
-Browser → Cloudflare Access (Discord login via herugrim)
-       → Cloudflare Pages (static site)
-       → Cloudflare Tunnel → Flask backend (API + panel)
-                           → Game server / Jellyfin / SSH
-```
-
-Users log in with Discord. Cloudflare Access handles auth using herugrim as the OIDC provider. Admin status is determined by a Discord role — no manual promotion needed.
-
-## Services
-
-| Service | URL | Description |
-|---------|-----|-------------|
-| Landing | meduseld.io | Splash page |
-| Services Hub | services.meduseld.io | Main navigation, status checks, calendar, game news |
-| Game Panel | panel.meduseld.io | Server control, logs, stats, charts |
-| System Monitor | system.meduseld.io | Server logs, resource monitoring, backup/reboot (admin) |
-| Admin Panel | admin.meduseld.io | User management (admin) |
-| Edoras | edoras.meduseld.io | Media service management (admin) |
-| Jellyfin | jellyfin.meduseld.io | Media streaming with auto-provisioned accounts |
-| SSH Terminal | ssh.meduseld.io | Browser-based SSH (admin) |
-| Health | health.meduseld.io | Public service status dashboard |
-
-## How to Access
-
-1. Go to https://meduseld.io
-2. Click through to the services menu
-3. Log in with Discord
-4. Pick what you need
-
-If you can't get in, ask whoever manages the Cloudflare Access list to add your Discord account.
-
-## Server Hardware
-
-AMD Ryzen 7 2700 • 32GB DDR4 3600 • RTX 3060 • 1TB NVMe SSD • Ubuntu Server 24.04
+- **meduseld-backend** — Flask API and control panel for managing a dedicated game server, Jellyfin SSO, system monitoring, and user management
+- **meduseld-site** — Static frontend pages served via Cloudflare Pages (services hub, admin panel, system monitor)
 
 ## Contributors
 
