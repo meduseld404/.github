@@ -8,18 +8,21 @@ We build tools for self-hosted server management. Our public project is Herugrim
 
 ## Open Source
 
-### [Herugrim](https://github.com/meduseld-io/herugrim)
+### [Herugrim](https://github.com/meduseld-io/herugrim) <img src="https://github.com/user-attachments/assets/a992766f-24d7-4271-88b4-62333265a1bf" alt="Herugrim" width="28" align="top">
 
 A Cloudflare Worker that lets you authenticate with Cloudflare Access using Discord. It wraps OIDC around Discord's OAuth2 API so Cloudflare Access can use Discord as an identity provider — no separate identity service needed.
 
 Fork of [Erisa/discord-oidc-worker](https://github.com/Erisa/discord-oidc-worker) with several improvements:
 
+- **Environment-based config** — all settings via Wrangler env vars and secrets, no credentials in source code
 - **Admin role detection** — checks for a specific Discord role and includes `is_admin` in the JWT, so your app can do role-based access control without a separate admin system
 - **Rich user claims** — the ID token includes a `discord_user` object with full profile data (ID, username, display name, avatar, discriminator) instead of just email
-- **No KV dependency** — signing keys are generated in-memory, so there's no Cloudflare KV namespace to set up
-- **No config file** — everything is configured as constants in the worker, no external `config.json` to manage
+- **Dynamic OAuth scopes** — only requests `guilds.members.read` when admin detection is enabled, reducing permissions for simpler setups
+- **No KV dependency** — signing keys are generated in-memory, no Cloudflare KV namespace to set up
+- **Error handling** — all Discord API calls are validated with descriptive error responses
+- **Health endpoint** — `GET /health` for uptime monitoring
 - **Optional guild restriction** — limit access to members of specific Discord servers
-- **Simplified setup** — clone, edit a few constants, deploy
+- **One-click deploy** — deploy button in the README for quick Cloudflare Workers setup
 
 If you're using Cloudflare Access and want Discord login, this is what you need. Check the [repo README](https://github.com/meduseld-io/herugrim#readme) for setup instructions.
 
