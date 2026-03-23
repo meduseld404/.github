@@ -4,9 +4,9 @@
 
 # Meduseld
 
-We build tools for self-hosted server management. Our public project is Herugrim — everything else is internal tooling for our gaming group.
+We're a group of friends building software for server management, media streaming, and other things we find useful. Some of it is open source, the rest is internal tooling for our gaming group.
 
-## Open Source
+## Public Projects
 
 ### [Herugrim](https://github.com/meduseld-io/herugrim) <img src="https://github.com/user-attachments/assets/a992766f-24d7-4271-88b4-62333265a1bf" alt="Herugrim" width="28" align="top">
 
@@ -27,6 +27,18 @@ Fork of [Erisa/discord-oidc-worker](https://github.com/Erisa/discord-oidc-worker
 If you're using Cloudflare Access and want Discord login, this is what you need. Check the [repo README](https://github.com/meduseld-io/herugrim#readme) for setup instructions.
 
 **Tech**: Cloudflare Workers, Hono, Jose · **License**: MIT
+
+### [FellowSync](https://github.com/meduseld-io/fellowsync) <img src="https://github.com/user-attachments/assets/19b8237d-3e5e-47cb-98b6-063807a54262" alt="FellowSync" width="28" align="top"> — *Coming Soon*
+
+A self-hosted Spotify listening party app. Create a room, invite friends, and listen to music together in sync. Everyone queues tracks, the host controls playback, and FellowSync keeps everyone's Spotify playing the same song at the same position.
+
+**Tech**: Flask, React, Redis, Spotify Web API · **License**: AGPL-3.0
+
+### [ExSpire](https://github.com/meduseld-io/exspire) <img src="https://github.com/user-attachments/assets/0f597755-d2a1-418d-bffa-b9e0ea4957ad" alt="ExSpire" width="28" align="top"> — *Coming Soon*
+
+Track things before they expire. Add subscriptions, documents, warranties, and more with expiry dates, then get reminders before they lapse. Items are displayed in a tower layout sorted by urgency.
+
+**Tech**: Express, React, SQLite · **License**: Source Available
 
 ## Internal Projects
 
